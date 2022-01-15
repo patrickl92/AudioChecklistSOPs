@@ -26,7 +26,7 @@ Represents the checklists that ship with the B738 Zibo Mod. Supported aircrafts:
 
 ### B737_SAS
 
-Represents the checklist that are used by SAS Scandinavian Airlines. Supported aircrafts:
+Represents the checklists that are used by SAS Scandinavian Airlines. Supported aircrafts:
 * Zibo Mod B737-800
 * LevelUp B737-600
 * LevelUp B737-700
