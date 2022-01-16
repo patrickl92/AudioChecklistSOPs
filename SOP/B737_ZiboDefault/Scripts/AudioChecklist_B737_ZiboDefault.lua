@@ -33,7 +33,7 @@ ziboDefaultSOP:addAirplane("B739")
 
 -- Create the voices
 local voicesDirectory = SCRIPT_DIRECTORY .. "AudioChecklists" .. DIRECTORY_SEPARATOR .. "B737_ZiboDefault" .. DIRECTORY_SEPARATOR .. "voices" .. DIRECTORY_SEPARATOR
-local voiceAndy = waveFileVoice:new("Andy", voicesDirectory .. "Andy" .. DIRECTORY_SEPARATOR .. "challenges", nil)
+local voiceAndy = waveFileVoice:new("Andy", voicesDirectory .. "Andy" .. DIRECTORY_SEPARATOR .. "challenges", voicesDirectory .. "Andy" .. DIRECTORY_SEPARATOR .. "responses")
 local voicePatrick = waveFileVoice:new("Patrick", nil, voicesDirectory .. "Patrick" .. DIRECTORY_SEPARATOR .. "responses")
 local voiceLars = waveFileVoice:new("Lars", voicesDirectory .. "Lars" .. DIRECTORY_SEPARATOR .. "challenges", voicesDirectory .. "Lars" .. DIRECTORY_SEPARATOR .. "responses")
 local voiceFlightdeck2Sim = waveFileVoice:new("flightdeck2sim", voicesDirectory .. "flightdeck2sim" .. DIRECTORY_SEPARATOR .. "challenges", voicesDirectory .. "flightdeck2sim" .. DIRECTORY_SEPARATOR .. "responses")
@@ -42,6 +42,7 @@ local voiceFlightdeck2Sim = waveFileVoice:new("flightdeck2sim", voicesDirectory 
 ziboDefaultSOP:addChallengeVoice(voiceAndy)
 ziboDefaultSOP:addChallengeVoice(voiceLars)
 ziboDefaultSOP:addChallengeVoice(voiceFlightdeck2Sim)
+ziboDefaultSOP:addResponseVoice(voiceAndy)
 ziboDefaultSOP:addResponseVoice(voicePatrick)
 ziboDefaultSOP:addResponseVoice(voiceLars)
 ziboDefaultSOP:addResponseVoice(voiceFlightdeck2Sim)
@@ -600,6 +601,7 @@ addChallengeSoundFilesMapping(voiceLars)
 addChallengeSoundFilesMapping(voiceFlightdeck2Sim)
 
 -- Add the mappings of the response sound
+addResponseSoundFilesMapping(voiceAndy)
 addResponseSoundFilesMapping(voicePatrick)
 addResponseSoundFilesMapping(voiceLars)
 addResponseSoundFilesMapping(voiceFlightdeck2Sim)
@@ -607,6 +609,19 @@ addResponseSoundFilesMapping(voiceFlightdeck2Sim)
 -- Add the available fail sound files
 -- Each time a checklist item does not meet its condition, a random fail sound is selected and played
 -- Each voice can have its own fail sound files
+voiceAndy:addFailSoundFile("Fail_AhThis.wav")
+voiceAndy:addFailSoundFile("Fail_AreYouSure.wav")
+voiceAndy:addFailSoundFile("Fail_CheckAgain.wav")
+voiceAndy:addFailSoundFile("Fail_Damn.wav")
+voiceAndy:addFailSoundFile("Fail_Hmm.wav")
+voiceAndy:addFailSoundFile("Fail_LetsSee.wav")
+voiceAndy:addFailSoundFile("Fail_No.wav")
+voiceAndy:addFailSoundFile("Fail_NotAgain.wav")
+voiceAndy:addFailSoundFile("Fail_Really.wav")
+voiceAndy:addFailSoundFile("Fail_RealPilot.wav")
+voiceAndy:addFailSoundFile("Fail_Whoops.wav")
+voiceAndy:addFailSoundFile("Fail_YouSure.wav")
+
 voicePatrick:addFailSoundFile("Fail_Damn.wav")
 voicePatrick:addFailSoundFile("Fail_Hmm.wav")
 voicePatrick:addFailSoundFile("Fail_AhThis.wav")

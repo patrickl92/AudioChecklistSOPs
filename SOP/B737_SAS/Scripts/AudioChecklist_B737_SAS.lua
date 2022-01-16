@@ -21,7 +21,7 @@ sasSOP:addAirplane("B739")
 
 -- Create the voices
 local voicesDirectory = SCRIPT_DIRECTORY .. "AudioChecklists" .. DIRECTORY_SEPARATOR .. "B737_SAS" .. DIRECTORY_SEPARATOR .. "voices" .. DIRECTORY_SEPARATOR
-local voiceAndy = waveFileVoice:new("Andy", voicesDirectory .. "Andy" .. DIRECTORY_SEPARATOR .. "challenges", nil)
+local voiceAndy = waveFileVoice:new("Andy", voicesDirectory .. "Andy" .. DIRECTORY_SEPARATOR .. "challenges", voicesDirectory .. "Andy" .. DIRECTORY_SEPARATOR .. "responses")
 local voicePatrick = waveFileVoice:new("Patrick", voicesDirectory .. "Patrick" .. DIRECTORY_SEPARATOR .. "challenges", voicesDirectory .. "Patrick" .. DIRECTORY_SEPARATOR .. "responses")
 local voiceLars = waveFileVoice:new("Lars", voicesDirectory .. "Lars" .. DIRECTORY_SEPARATOR .. "challenges", voicesDirectory .. "Lars" .. DIRECTORY_SEPARATOR .. "responses")
 local voiceTrine = waveFileVoice:new("Trine", voicesDirectory .. "Trine" .. DIRECTORY_SEPARATOR .. "challenges", voicesDirectory .. "Trine" .. DIRECTORY_SEPARATOR .. "responses")
@@ -31,6 +31,7 @@ sasSOP:addChallengeVoice(voiceAndy)
 sasSOP:addChallengeVoice(voicePatrick)
 sasSOP:addChallengeVoice(voiceLars)
 sasSOP:addChallengeVoice(voiceTrine)
+sasSOP:addResponseVoice(voiceAndy)
 sasSOP:addResponseVoice(voicePatrick)
 sasSOP:addResponseVoice(voiceLars)
 sasSOP:addResponseVoice(voiceTrine)
@@ -502,6 +503,7 @@ addChallengeSoundFilesMapping(voiceLars)
 addChallengeSoundFilesMapping(voiceTrine)
 
 -- Add the mappings of the response sound
+addResponseSoundFilesMapping(voiceAndy)
 addResponseSoundFilesMapping(voicePatrick)
 addResponseSoundFilesMapping(voiceLars)
 addResponseSoundFilesMapping(voiceTrine)
@@ -509,6 +511,16 @@ addResponseSoundFilesMapping(voiceTrine)
 -- Add the available fail sound files
 -- Each time a checklist item does not meet its condition, a random fail sound is selected and played
 -- Each voice can have its own fail sound files
+voiceAndy:addFailSoundFile("Fail_CheckAgain.wav")
+voiceAndy:addFailSoundFile("Fail_Damn.wav")
+voiceAndy:addFailSoundFile("Fail_Hmm.wav")
+voiceAndy:addFailSoundFile("Fail_LetsSee.wav")
+voiceAndy:addFailSoundFile("Fail_No.wav")
+voiceAndy:addFailSoundFile("Fail_NotAgain.wav")
+voiceAndy:addFailSoundFile("Fail_Really.wav")
+voiceAndy:addFailSoundFile("Fail_Whoops.wav")
+voiceAndy:addFailSoundFile("Fail_YouSure.wav")
+
 voicePatrick:addFailSoundFile("Fail_Damn.wav")
 voicePatrick:addFailSoundFile("Fail_Hmm.wav")
 voicePatrick:addFailSoundFile("Fail_AhThis.wav")
