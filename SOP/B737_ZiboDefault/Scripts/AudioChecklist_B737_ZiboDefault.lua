@@ -372,6 +372,20 @@ local function getResponseAutobrake()
 	return "CHECKED"
 end
 
+--- Gets the key of the response sound file for the electrical checklist item
+-- @treturn string The key of the response sound file to play
+local function getResponseElectrical()
+	if utils.readDataRefInteger("sim/cockpit/electrical/generator_apu_on") == 1 then
+		return "APU_ON_THE_BUS"
+	end
+	
+	if utils.readDataRefInteger("sim/cockpit/electrical/gpu_on") == 1 then
+		return "GPU_ON_THE_BUS"
+	end
+	
+	return "CHECKED"
+end
+
 --- Checks whether the stab trim is set to the calculated stab trim of the FMS
 -- @treturn bool True if the stab trim is set correctly, otherwise false
 local function evaluateStabTrim()
@@ -578,6 +592,7 @@ local function addResponseSoundFilesMapping(voice)
 	voice:addResponseSoundFile("AUTOBRAKE_2", "Response_Autobrake2Set.wav")
 	voice:addResponseSoundFile("AUTOBRAKE_3", "Response_Autobrake3Set.wav")
 	voice:addResponseSoundFile("AUTOBRAKE_MAX", "Response_AutobrakeMaxSet.wav")
+	voice:addResponseSoundFile("APU_ON_THE_BUS", "Response_ApuOnTheBus.wav")
 	voice:addResponseSoundFile("GPU_ON_THE_BUS", "Response_GpuOnTheBus.wav")
 	voice:addResponseSoundFile("CUTOFF", "Response_CutOff.wav")
 	voice:addResponseSoundFile("IN", "Response_In.wav")
@@ -804,7 +819,7 @@ landingChecklist:addItem(soundChecklistItem:new("LandingChecklist_Completed"))
 -- ################# SHUTDOWN
 shutdownChecklist:addItem(soundChecklistItem:new("ShutdownChecklist_Start"))
 shutdownChecklist:addItem(automaticChecklistItem:new("FUEL PUMPS", "OFF", "ShutdownChecklist_FuelPumps", function() return utils.readDataRefFloat("laminar/B738/fuel/fuel_tank_pos_lft1") == 0 and utils.readDataRefFloat("laminar/B738/fuel/fuel_tank_pos_lft2") == 0 and utils.readDataRefFloat("laminar/B738/fuel/fuel_tank_pos_rgt1") == 0 and utils.readDataRefFloat("laminar/B738/fuel/fuel_tank_pos_rgt2") == 0 and utils.readDataRefFloat("laminar/B738/fuel/fuel_tank_pos_ctr1") == 0 and utils.readDataRefFloat("laminar/B738/fuel/fuel_tank_pos_ctr2") == 0 end))
-shutdownChecklist:addItem(automaticDynamicResponseChecklistItem:new("ELECTRICAL", "ON __", "ShutdownChecklist_Electrical", function() return "GPU_ON_THE_BUS" end, function() return utils.readDataRefInteger("sim/cockpit/electrical/gpu_on") == 1 end))
+shutdownChecklist:addItem(automaticDynamicResponseChecklistItem:new("ELECTRICAL", "ON __", "ShutdownChecklist_Electrical", getResponseElectrical, function() return utils.readDataRefInteger("sim/cockpit/electrical/generator_apu_on") == 1 or utils.readDataRefInteger("sim/cockpit/electrical/gpu_on") == 1 end))
 shutdownChecklist:addItem(automaticChecklistItem:new("FASTEN BELTS", "OFF", "ShutdownChecklist_FastenBelts", function() return utils.readDataRefFloat("laminar/B738/toggle_switch/seatbelt_sign_pos") == 0 end))
 shutdownChecklist:addItem(automaticChecklistItem:new("WINDOW HEAT", "OFF", "ShutdownChecklist_WindowHeat", function() return utils.readDataRefFloat("laminar/B738/ice/window_heat_l_fwd_pos") == 0 and utils.readDataRefFloat("laminar/B738/ice/window_heat_l_side_pos") == 0 and utils.readDataRefFloat("laminar/B738/ice/window_heat_r_fwd_pos") == 0 and utils.readDataRefFloat("laminar/B738/ice/window_heat_r_side_pos") == 0 end))
 shutdownChecklist:addItem(automaticChecklistItem:new("PROBE HEAT", "OFF", "ShutdownChecklist_ProbeHeat", function() return utils.readDataRefFloat("laminar/B738/toggle_switch/capt_probes_pos") == 0 and utils.readDataRefFloat("laminar/B738/toggle_switch/fo_probes_pos") == 0 end))
@@ -829,7 +844,7 @@ shutdownChecklist:addItem(soundChecklistItem:new("ShutdownChecklist_Completed"))
 
 -- ################# SHUTDOWN (TRANSIT)
 shutdownChecklistTransit:addItem(soundChecklistItem:new("ShutdownChecklist_Start"))
-shutdownChecklistTransit:addItem(automaticDynamicResponseChecklistItem:new("ELECTRICAL", "ON __", "ShutdownChecklist_Electrical", function() return "GPU_ON_THE_BUS" end, function() return utils.readDataRefInteger("sim/cockpit/electrical/gpu_on") == 1 end))
+shutdownChecklistTransit:addItem(automaticDynamicResponseChecklistItem:new("ELECTRICAL", "ON __", "ShutdownChecklist_Electrical", getResponseElectrical, function() return utils.readDataRefInteger("sim/cockpit/electrical/generator_apu_on") == 1 or utils.readDataRefInteger("sim/cockpit/electrical/gpu_on") == 1 end))
 shutdownChecklistTransit:addItem(automaticChecklistItem:new("FASTEN BELTS", "OFF", "ShutdownChecklist_FastenBelts", function() return utils.readDataRefFloat("laminar/B738/toggle_switch/seatbelt_sign_pos") == 0 end))
 shutdownChecklistTransit:addItem(automaticChecklistItem:new("PROBE HEAT", "OFF", "ShutdownChecklist_ProbeHeat", function() return utils.readDataRefFloat("laminar/B738/toggle_switch/capt_probes_pos") == 0 and utils.readDataRefFloat("laminar/B738/toggle_switch/fo_probes_pos") == 0 end))
 shutdownChecklistTransit:addItem(automaticChecklistItem:new("ANTI-ICE", "OFF", "ShutdownChecklist_AntiIce", function() return utils.readDataRefFloat("laminar/B738/ice/eng1_heat_pos") == 0 and utils.readDataRefFloat("laminar/B738/ice/eng2_heat_pos") == 0 end))
