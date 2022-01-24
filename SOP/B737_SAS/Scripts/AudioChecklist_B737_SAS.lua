@@ -92,12 +92,12 @@ end
 -- This function is called every second and is used to update values which are not required immediately
 local function updateDataRefVariablesOften()
 	enginesRunning = utils.checkArrayValuesAllInteger("sim/flightmodel/engine/ENGN_running", 0, 2, function(v) return v == 1 end)
-	
+
 	if utils.readDataRefFloat("laminar/B738/controls/gear_handle_down") == 1 then
 		-- Reset the Recall check for the descent if the landing gear is deployed
 		recallCheckedForDescent = false
 	end
-	
+
 	local togaActivated = false
 	if utils.readDataRefFloat("laminar/B738/autopilot/pfd_alt_mode") == 11 then
 		-- Aircraft is in TO/GA mode
@@ -108,11 +108,11 @@ local function updateDataRefVariablesOften()
 	else
 		togaActive = false
 	end
-		
+
 	if togaActivated then
 		-- Stop the current checklist if TO/GA was activated
 		sopExecutor.stopChecklist()
-		
+
 		-- Reset the airborne checklists if TO/GA was activated
 		afterTakeoffChecklist:reset()
 		descentChecklist:reset()
@@ -130,17 +130,17 @@ local function updateDataRefVariablesEveryFrame()
 		if not fuelShutoffValveLeftOffChecked and utils.readDataRefFloat("laminar/B738/engine/mixture_ratio1") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/eng1_valve_closed") == 0 then
 			fuelShutoffValveLeftOffChecked = true
 		end
-		
+
 		if fuelShutoffValveLeftOffChecked and utils.readDataRefFloat("laminar/B738/engine/mixture_ratio1") == 0 and utils.readDataRefFloat("laminar/B738/annunciator/eng1_valve_closed") == 0.5 then
 			fuelShutoffValveLeftChecked = true
 		end
 	end
-	
+
 	if not fuelShutoffValveRightChecked then
 		if not fuelShutoffValveRightOffChecked and utils.readDataRefFloat("laminar/B738/engine/mixture_ratio2") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/eng2_valve_closed") == 0 then
 			fuelShutoffValveRightOffChecked = true
 		end
-		
+
 		if fuelShutoffValveRightOffChecked and utils.readDataRefFloat("laminar/B738/engine/mixture_ratio2") == 0 and utils.readDataRefFloat("laminar/B738/annunciator/eng2_valve_closed") == 0.5 then
 			fuelShutoffValveRightChecked = true
 		end
@@ -150,37 +150,37 @@ local function updateDataRefVariablesEveryFrame()
 		-- The oxygon check has been performed
 		oxygenChecked = true
 	end
-	
+
 	-- Only check certain values if the engines are running, to prevent any decrease in performance
 	if enginesRunning then
 		if not recallCheckedBeforeTaxi and (utils.readDataRefFloat("laminar/B738/buttons/capt_6_pack_pos") == 1 or utils.readDataRefFloat("laminar/B738/buttons/fo_6_pack_pos") == 1) then
 			recallCheckedBeforeTaxi = true
 		end
-		
+
 		if not recallCheckedForDescent and (utils.readDataRefFloat("laminar/B738/buttons/capt_6_pack_pos") == 1 or utils.readDataRefFloat("laminar/B738/buttons/fo_6_pack_pos") == 1) and utils.readDataRefFloat("laminar/B738/controls/gear_handle_down") <= 0.5 then
 			recallCheckedForDescent = true
 		end
-		
+
 		if not flightControlYokeFullForwardChecked and utils.readDataRefFloat("laminar/yoke/pitch") < -0.9 then
 			flightControlYokeFullForwardChecked = true
 		end
-		
+
 		if not flightControlYokeFullBackwardChecked and utils.readDataRefFloat("laminar/yoke/pitch") > 0.9 then
 			flightControlYokeFullBackwardChecked = true
 		end
-		
+
 		if not flightControlYokeFullLeftChecked and utils.readDataRefFloat("laminar/yoke/roll") < -0.9 then
 			flightControlYokeFullLeftChecked = true
 		end
-		
+
 		if not flightControlYokeFullRightChecked and utils.readDataRefFloat("laminar/yoke/roll") > 0.9 then
 			flightControlYokeFullRightChecked = true
 		end
-		
+
 		if not flightControlRudderFullRightChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio") > 0.9 then
 			flightControlRudderFullRightChecked = true
 		end
-		
+
 		if not flightControlRudderFullLeftChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio") < -0.9 then
 			flightControlRudderFullLeftChecked = true
 		end
@@ -203,7 +203,7 @@ local function getResponseFuelPumps()
 	if utils.readDataRefFloat("laminar/B738/fuel/fuel_tank_pos_ctr1") == 1 then
 		return "FUEL_PUMPS_6_ON"
 	end
-	
+
 	return "FUEL_PUMPS_4_ON"
 end
 
@@ -213,7 +213,7 @@ local function getResponseAntiIce()
 	if utils.readDataRefFloat("laminar/B738/ice/eng1_heat_pos") == 1 then
 		return "ON"
 	end
-	
+
 	return "OFF"
 end
 
@@ -221,31 +221,31 @@ end
 -- @treturn string The key of the response sound file to play
 local function getResponseFlapsSet()
 	local flapLeverPos = utils.readDataRefFloat("laminar/B738/flt_ctrls/flap_lever")
-		
+
 	if flapLeverPos == 0.125 then
 		return "FLAPS_1_SET"
 	end
-	
+
 	if flapLeverPos == 0.375 then
 		return "FLAPS_5_SET"
 	end
-	
+
 	if flapLeverPos == 0.5 then
 		return "FLAPS_10_SET"
 	end
-	
+
 	if flapLeverPos == 0.625 then
 		return "FLAPS_15_SET"
 	end
-	
+
 	if flapLeverPos == 0.875 then
 		return "FLAPS_30_SET"
 	end
-	
+
 	if flapLeverPos == 1 then
 		return "FLAPS_40_SET"
 	end
-		
+
 	return "CHECKED"
 end
 
@@ -253,31 +253,31 @@ end
 -- @treturn string The key of the response sound file to play
 local function getResponseFlapsSetGreenLight()
 	local flapLeverPos = utils.readDataRefFloat("laminar/B738/flt_ctrls/flap_lever")
-		
+
 	if flapLeverPos == 0.125 then
 		return "FLAPS_1_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 0.375 then
 		return "FLAPS_5_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 0.5 then
 		return "FLAPS_10_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 0.625 then
 		return "FLAPS_15_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 0.875 then
 		return "FLAPS_30_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 1 then
 		return "FLAPS_40_SET_GREEN_LIGHT"
 	end
-		
+
 	return "CHECKED"
 end
 
@@ -285,27 +285,27 @@ end
 -- @treturn string The key of the response sound file to play
 local function getResponseAutobrake()
 	local autobrakeSwitchPosition = utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos")
-	
+
 	if autobrakeSwitchPosition == 1 then
 		return "AUTOBRAKE_OFF"
 	end
-	
+
 	if autobrakeSwitchPosition == 2 then
 		return "AUTOBRAKE_1"
 	end
-	
+
 	if autobrakeSwitchPosition == 3 then
 		return "AUTOBRAKE_2"
 	end
-	
+
 	if autobrakeSwitchPosition == 4 then
 		return "AUTOBRAKE_3"
 	end
-	
+
 	if autobrakeSwitchPosition == 5 then
 		return "AUTOBRAKE_MAX"
 	end
-	
+
 	return "CHECKED"
 end
 
@@ -315,7 +315,7 @@ local function getResponseAltimeter()
 	if utils.readDataRefFloat("laminar/B738/EFIS/baro_set_std_pilot") == 1 then
 		return "STANDARD_SET"
 	end
-	
+
 	return "QNH_SET"
 end
 
@@ -331,7 +331,7 @@ local function getResponseParkingBrake()
 	if chocksSet then
 		return "NOT_SET_CHOCKS_INSTALLED"
 	end
-	
+
 	return "SET"
 end
 
@@ -579,7 +579,7 @@ beforeTaxiChecklist:addItem(automaticChecklistItem:new("RECALL", "CHECKED", "Bef
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("AUTOBRAKE", "RTO", "BeforeTaxi_Autobrake", function() return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos") == 0 end))
 beforeTaxiChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__", "BeforeTaxi_Flaps", getResponseFlapsSet, function() return utils.readDataRefFloat("laminar/B738/flt_ctrls/flap_lever") > 0 end))
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("ENGINE START LEVERS", "IDLE DETENT", "BeforeTaxi_EngineStartLevers", function() return utils.readDataRefFloat("laminar/B738/engine/mixture_ratio1") == 1 and utils.readDataRefFloat("laminar/B738/engine/mixture_ratio2") == 1 end))
-beforeTaxiChecklist:addItem(automaticChecklistItem:new("RUDDER AND AILERON TRIM", "FREE & ZERO", "BeforeTaxi_RudderAileronTrim", function() return utils.readDataRefFloat("sim/cockpit2/controls/rudder_trim") == 0 and utils.readDataRefFloat("sim/cockpit2/controls/aileron_trim") == 0 end))
+beforeTaxiChecklist:addItem(automaticChecklistItem:new("RUDDER AND AILERON TRIM", "FREE & ZERO", "BeforeTaxi_RudderAileronTrim", function() return math.abs(utils.readDataRefFloat("sim/cockpit2/controls/rudder_trim")) < 0.01 and math.abs(utils.readDataRefFloat("sim/cockpit2/controls/aileron_trim")) < 0.1 end))
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("FLIGHT CONTROLS", "CHECKED", "BeforeTaxi_FlightControls", function() return flightControlYokeFullForwardChecked and flightControlYokeFullBackwardChecked and flightControlYokeFullLeftChecked and flightControlYokeFullRightChecked and flightControlRudderFullRightChecked and flightControlRudderFullLeftChecked end))
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("GROUND EQUIPMENT", "CLEAR", "BeforeTaxi_GroundEquipment", function() return true end))
 beforeTaxiChecklist:addItem(soundChecklistItem:new("BeforeTaxi_Complete"))
