@@ -8,6 +8,8 @@ You need to install the [AudioChecklist](https://github.com/patrickl92/AudioChec
 
 ## Installation
 
+This exension is available completely for free. If you want to support me, please consider a donation: [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=FQDNVDU5PGZ4G). Thank you.
+
 * Download the [latest release](https://github.com/patrickl92/AudioChecklistSOPs/releases) of the SOP you want to use (you can install multiple SOPs)
 * Copy the content of the `Scripts` folder to the `<X-Plane 11>/Resources/plugins/FlyWithLua/Scripts` folder
 
