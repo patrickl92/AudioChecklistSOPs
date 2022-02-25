@@ -157,31 +157,31 @@ local function updateDataRefVariablesEveryFrame()
 			recallCheckedBeforeTaxi = true
 		end
 
-		if not recallCheckedForDescent and (utils.readDataRefFloat("laminar/B738/buttons/capt_6_pack_pos") == 1 or utils.readDataRefFloat("laminar/B738/buttons/fo_6_pack_pos") == 1) and utils.readDataRefFloat("laminar/B738/controls/gear_handle_down") <= 0.5 then
+		if not recallCheckedForDescent and (utils.readDataRefFloat("laminar/B738/buttons/capt_6_pack_pos") == 1 or utils.readDataRefFloat("laminar/B738/buttons/fo_6_pack_pos") == 1) and utils.readDataRefFloat("laminar/B738/controls/gear_handle_down", 0) <= 0.5 then
 			recallCheckedForDescent = true
 		end
 
-		if not flightControlYokeFullForwardChecked and utils.readDataRefFloat("laminar/yoke/pitch") < -0.9 then
+		if not flightControlYokeFullForwardChecked and utils.readDataRefFloat("laminar/yoke/pitch", 0) < -0.9 then
 			flightControlYokeFullForwardChecked = true
 		end
 
-		if not flightControlYokeFullBackwardChecked and utils.readDataRefFloat("laminar/yoke/pitch") > 0.9 then
+		if not flightControlYokeFullBackwardChecked and utils.readDataRefFloat("laminar/yoke/pitch", 0) > 0.9 then
 			flightControlYokeFullBackwardChecked = true
 		end
 
-		if not flightControlYokeFullLeftChecked and utils.readDataRefFloat("laminar/yoke/roll") < -0.9 then
+		if not flightControlYokeFullLeftChecked and utils.readDataRefFloat("laminar/yoke/roll", 0) < -0.9 then
 			flightControlYokeFullLeftChecked = true
 		end
 
-		if not flightControlYokeFullRightChecked and utils.readDataRefFloat("laminar/yoke/roll") > 0.9 then
+		if not flightControlYokeFullRightChecked and utils.readDataRefFloat("laminar/yoke/roll", 0) > 0.9 then
 			flightControlYokeFullRightChecked = true
 		end
 
-		if not flightControlRudderFullRightChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio") > 0.9 then
+		if not flightControlRudderFullRightChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio", 0) > 0.9 then
 			flightControlRudderFullRightChecked = true
 		end
 
-		if not flightControlRudderFullLeftChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio") < -0.9 then
+		if not flightControlRudderFullLeftChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio", 0) < -0.9 then
 			flightControlRudderFullLeftChecked = true
 		end
 	else
@@ -338,7 +338,14 @@ end
 --- Checks whether the stab trim is set to the calculated stab trim of the FMS
 -- @treturn bool True if the stab trim is set correctly, otherwise false
 local function evaluateStabTrim()
-	return math.abs(utils.readDataRefFloat("laminar/B738/FMS/trim_calc") - (8 + 8 * utils.readDataRefFloat("laminar/B738/flt_ctrls/trim_wheel"))) < 1
+	local trimCalculated = utils.readDataRefFloat("laminar/B738/FMS/trim_calc")
+	local trimWheel = utils.readDataRefFloat("laminar/B738/flt_ctrls/trim_wheel")
+	
+	if not trimCalculated or not trimWheel then
+		return false
+	end
+	
+	return math.abs(trimCalculated - (8 + 8 * trimWheel)) < 1
 end
 
 --- Adds the mapping of the challenge sound files to a waveFileVoice.
@@ -577,9 +584,9 @@ beforeTaxiChecklist:addItem(automaticChecklistItem:new("ISOLATION VALVE", "AUTO"
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("ENGINE START SWITCHES", "CONT", "BeforeTaxi_EngineStartSwitches", function() return utils.readDataRefFloat("laminar/B738/engine/starter1_pos") == 2 and utils.readDataRefFloat("laminar/B738/engine/starter2_pos") == 2 end))
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("RECALL", "CHECKED", "BeforeTaxi_Recall", function() return recallCheckedBeforeTaxi end))
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("AUTOBRAKE", "RTO", "BeforeTaxi_Autobrake", function() return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos") == 0 end))
-beforeTaxiChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__", "BeforeTaxi_Flaps", getResponseFlapsSet, function() return utils.readDataRefFloat("laminar/B738/flt_ctrls/flap_lever") > 0 end))
+beforeTaxiChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__", "BeforeTaxi_Flaps", getResponseFlapsSet, function() return utils.readDataRefFloat("laminar/B738/flt_ctrls/flap_lever", 0) > 0 end))
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("ENGINE START LEVERS", "IDLE DETENT", "BeforeTaxi_EngineStartLevers", function() return utils.readDataRefFloat("laminar/B738/engine/mixture_ratio1") == 1 and utils.readDataRefFloat("laminar/B738/engine/mixture_ratio2") == 1 end))
-beforeTaxiChecklist:addItem(automaticChecklistItem:new("RUDDER AND AILERON TRIM", "FREE & ZERO", "BeforeTaxi_RudderAileronTrim", function() return math.abs(utils.readDataRefFloat("sim/cockpit2/controls/rudder_trim")) < 0.01 and math.abs(utils.readDataRefFloat("sim/cockpit2/controls/aileron_trim")) < 0.1 end))
+beforeTaxiChecklist:addItem(automaticChecklistItem:new("RUDDER AND AILERON TRIM", "FREE & ZERO", "BeforeTaxi_RudderAileronTrim", function() return math.abs(utils.readDataRefFloat("sim/cockpit2/controls/rudder_trim", 0)) < 0.01 and math.abs(utils.readDataRefFloat("sim/cockpit2/controls/aileron_trim", 0)) < 0.1 end))
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("FLIGHT CONTROLS", "CHECKED", "BeforeTaxi_FlightControls", function() return flightControlYokeFullForwardChecked and flightControlYokeFullBackwardChecked and flightControlYokeFullLeftChecked and flightControlYokeFullRightChecked and flightControlRudderFullRightChecked and flightControlRudderFullLeftChecked end))
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("GROUND EQUIPMENT", "CLEAR", "BeforeTaxi_GroundEquipment", function() return true end))
 beforeTaxiChecklist:addItem(soundChecklistItem:new("BeforeTaxi_Complete"))
@@ -604,7 +611,7 @@ afterTakeoffChecklist:addItem(soundChecklistItem:new("AfterTakeoff_Complete"))
 descentChecklist:addItem(soundChecklistItem:new("Descent_Start"))
 descentChecklist:addItem(manualDynamicResponseChecklistItem:new("PRESSURIZATION", "LAND ALT __", "Descent_Pressurization", function() return "SET" end))
 descentChecklist:addItem(automaticChecklistItem:new("RECALL", "CHECKED", "Descent_Recall", function() return recallCheckedForDescent end))
-descentChecklist:addItem(automaticDynamicResponseChecklistItem:new("AUTOBRAKE", "__", "Descent_Autobrake", getResponseAutobrake, function() return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos") >= 1 end))
+descentChecklist:addItem(automaticDynamicResponseChecklistItem:new("AUTOBRAKE", "__", "Descent_Autobrake", getResponseAutobrake, function() return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos", 0) >= 1 end))
 descentChecklist:addItem(manualDynamicResponseChecklistItem:new("LANDING DATA", "VREF __, MINIMUMS __", "Descent_LandingData", function() return "VREF_MINIMUMS_CHECKED_SET" end))
 descentChecklist:addItem(manualChecklistItem:new("APPROACH BRIEFING", "COMPLETED", "Descent_ApproachBriefing"))
 descentChecklist:addItem(soundChecklistItem:new("Descent_Complete"))

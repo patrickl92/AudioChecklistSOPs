@@ -115,7 +115,7 @@ end
 local function updateDataRefVariablesOften()
 	enginesRunning = utils.checkArrayValuesAllInteger("sim/flightmodel/engine/ENGN_running", 0, 2, function(v) return v == 1 end)
 	
-	local radioAltimeterValue = utils.readDataRefFloat("sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot")
+	local radioAltimeterValue = utils.readDataRefFloat("sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot", 0)
 	radioAltimeterActive = radioAltimeterValue > 1 and radioAltimeterValue <= 2500
 	
 	if radioAltimeterValue <= 1 then
@@ -186,27 +186,27 @@ local function updateDataRefVariablesEveryFrame()
 
 	-- Only check certain values if the engines are running, to prevent any decrease in performance
 	if enginesRunning then
-		if not flightControlYokeFullForwardChecked and utils.readDataRefFloat("laminar/yoke/pitch") < -0.9 then
+		if not flightControlYokeFullForwardChecked and utils.readDataRefFloat("laminar/yoke/pitch", 0) < -0.9 then
 			flightControlYokeFullForwardChecked = true
 		end
 		
-		if not flightControlYokeFullBackwardChecked and utils.readDataRefFloat("laminar/yoke/pitch") > 0.9 then
+		if not flightControlYokeFullBackwardChecked and utils.readDataRefFloat("laminar/yoke/pitch", 0) > 0.9 then
 			flightControlYokeFullBackwardChecked = true
 		end
 		
-		if not flightControlYokeFullLeftChecked and utils.readDataRefFloat("laminar/yoke/roll") < -0.9 then
+		if not flightControlYokeFullLeftChecked and utils.readDataRefFloat("laminar/yoke/roll", 0) < -0.9 then
 			flightControlYokeFullLeftChecked = true
 		end
 		
-		if not flightControlYokeFullRightChecked and utils.readDataRefFloat("laminar/yoke/roll") > 0.9 then
+		if not flightControlYokeFullRightChecked and utils.readDataRefFloat("laminar/yoke/roll", 0) > 0.9 then
 			flightControlYokeFullRightChecked = true
 		end
 		
-		if not flightControlRudderFullRightChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio") > 0.9 then
+		if not flightControlRudderFullRightChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio", 0) > 0.9 then
 			flightControlRudderFullRightChecked = true
 		end
 		
-		if not flightControlRudderFullLeftChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio") < -0.9 then
+		if not flightControlRudderFullLeftChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio", 0) < -0.9 then
 			flightControlRudderFullLeftChecked = true
 		end
 		
@@ -389,7 +389,14 @@ end
 --- Checks whether the stab trim is set to the calculated stab trim of the FMS
 -- @treturn bool True if the stab trim is set correctly, otherwise false
 local function evaluateStabTrim()
-	return math.abs(utils.readDataRefFloat("laminar/B738/FMS/trim_calc") - (8 + 8 * utils.readDataRefFloat("laminar/B738/flt_ctrls/trim_wheel"))) < 1
+	local trimCalculated = utils.readDataRefFloat("laminar/B738/FMS/trim_calc")
+	local trimWheel = utils.readDataRefFloat("laminar/B738/flt_ctrls/trim_wheel")
+	
+	if not trimCalculated or not trimWheel then
+		return false
+	end
+	
+	return math.abs(trimCalculated - (8 + 8 * trimWheel)) < 1
 end
 
 --- Adds the mapping of the challenge sound files to a waveFileVoice.
@@ -689,18 +696,18 @@ beforeStartChecklistToTheLine:addItem(manualChecklistItem:new("PRESS", "SET", "B
 beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("PRESSURIZATION MODE SELECTOR", "AUTO", "BeforeStartChecklistToTheLine_PressModeSelector", function() return utils.readDataRefFloat("laminar/B738/pressurization_mode") == 1 end))
 beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("INSTRUMENTS", "X-CHECKED", "BeforeStartChecklistToTheLine_Instruments", function() return true end))
 beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("AUTOBRAKE", "RTO", "BeforeStartChecklistToTheLine_Autobrake", function() return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos") == 0 end))
-beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("HYDRAULICS", "NORMAL", "BeforeStartChecklistToTheLine_Hydraulics", function() return utils.readDataRefFloat("laminar/B738/hydraulic/A_pressure") >= 2800 and utils.readDataRefFloat("laminar/B738/hydraulic/B_pressure") >= 2800 and utils.readDataRefFloat("laminar/B738/hydraulic/hyd_A_qty") >= 76 and utils.readDataRefFloat("laminar/B738/hydraulic/hyd_B_qty") >= 76 end))
+beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("HYDRAULICS", "NORMAL", "BeforeStartChecklistToTheLine_Hydraulics", function() return utils.readDataRefFloat("laminar/B738/hydraulic/A_pressure", 0) >= 2800 and utils.readDataRefFloat("laminar/B738/hydraulic/B_pressure", 0) >= 2800 and utils.readDataRefFloat("laminar/B738/hydraulic/hyd_A_qty", 0) >= 76 and utils.readDataRefFloat("laminar/B738/hydraulic/hyd_B_qty", 0) >= 76 end))
 beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("SPEEDBRAKE", "DOWN DETENT", "BeforeStartChecklistToTheLine_Speedbrake", function() return utils.readDataRefFloat("laminar/B738/flt_ctrls/speedbrake_lever") == 0 and utils.readDataRefFloat("laminar/B738/flt_ctrls/speedbrake_lever_stop") == 0 end))
 beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("PARKING BRAKE", "SET", "BeforeStartChecklistToTheLine_Parkingbrake", function() return utils.readDataRefFloat("laminar/B738/parking_brake_pos") == 1 end))
 beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("STAB TRIM CUTOUT SWITCHES", "NORMAL", "BeforeStartChecklistToTheLine_StabTrimCutoutSwitches", function() return utils.readDataRefFloat("laminar/B738/toggle_switch/el_trim_pos") == 0 and utils.readDataRefFloat("laminar/B738/toggle_switch/ap_trim_pos") == 0 end))
 beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("WHEEL WELL FIRE WARNING", "CHECKED", "BeforeStartChecklistToTheLine_WheelWellFireWarning", function() return fireWarningTestDone end))
 beforeStartChecklistToTheLine:addItem(manualChecklistItem:new("RADIOS, RADAR * TXPDR", "SET & STBY", "BeforeStartChecklistToTheLine_RadiosRadarTransponder"))
-beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("RUDDER & AILERON TRIMS", "FREE & ZERO", "BeforeStartChecklistToTheLine_RudderAileronTrims", function() return math.abs(utils.readDataRefFloat("sim/cockpit2/controls/rudder_trim")) < 0.01 and math.abs(utils.readDataRefFloat("sim/cockpit2/controls/aileron_trim")) < 0.1 end))
+beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("RUDDER & AILERON TRIMS", "FREE & ZERO", "BeforeStartChecklistToTheLine_RudderAileronTrims", function() return math.abs(utils.readDataRefFloat("sim/cockpit2/controls/rudder_trim", 0)) < 0.01 and math.abs(utils.readDataRefFloat("sim/cockpit2/controls/aileron_trim", 0)) < 0.1 end))
 beforeStartChecklistToTheLine:addItem(manualChecklistItem:new("TAKEOFF BRIEFING", "DISCUSSED", "BeforeStartChecklistToTheLine_TakeoffBriefing"))
 beforeStartChecklistToTheLine:addItem(manualChecklistItem:new("PA", "COMPLETE", "BeforeStartChecklistToTheLine_PA"))
 beforeStartChecklistToTheLine:addItem(manualChecklistItem:new("FMC/CDU", "SET", "BeforeStartChecklistToTheLine_FmcCdu"))
-beforeStartChecklistToTheLine:addItem(automaticDynamicResponseChecklistItem:new("N1 & IAS BUGS", "AUTO __ / __ SET", "BeforeStartChecklistToTheLine_N1IasBugs", function() return "N1_IAS_AUTO_VSPEEDS_SET" end, function() return utils.readDataRefFloat("laminar/B738/toggle_switch/n1_set_source") == 0 and utils.readDataRefFloat("laminar/B738/toggle_switch/spd_ref") == 0 and utils.readDataRefFloat("laminar/B738/FMS/v1_set") > 0 and utils.readDataRefFloat("laminar/B738/FMS/vr_set") > 0 and utils.readDataRefFloat("laminar/B738/FMS/v2_set") > 0 and utils.readDataRefFloat("laminar/B738/FMS/v2_set") == utils.readDataRefFloat("laminar/B738/autopilot/mcp_speed_dial_kts") end))
-beforeStartChecklistToTheLine:addItem(automaticDynamicResponseChecklistItem:new("STAB TRIM", "__ SET", "BeforeStartChecklistToTheLine_StabTrim", function() return "SET" end, function() return math.abs(utils.readDataRefFloat("laminar/B738/FMS/trim_calc") - (8 + 8 * utils.readDataRefFloat("laminar/B738/flt_ctrls/trim_wheel"))) < 1 end))
+beforeStartChecklistToTheLine:addItem(automaticDynamicResponseChecklistItem:new("N1 & IAS BUGS", "AUTO __ / __ SET", "BeforeStartChecklistToTheLine_N1IasBugs", function() return "N1_IAS_AUTO_VSPEEDS_SET" end, function() return utils.readDataRefFloat("laminar/B738/toggle_switch/n1_set_source") == 0 and utils.readDataRefFloat("laminar/B738/toggle_switch/spd_ref") == 0 and utils.readDataRefFloat("laminar/B738/FMS/v1_set", 0) > 0 and utils.readDataRefFloat("laminar/B738/FMS/vr_set", 0) > 0 and utils.readDataRefFloat("laminar/B738/FMS/v2_set", 0) > 0 and utils.readDataRefFloat("laminar/B738/FMS/v2_set") == utils.readDataRefFloat("laminar/B738/autopilot/mcp_speed_dial_kts") end))
+beforeStartChecklistToTheLine:addItem(automaticDynamicResponseChecklistItem:new("STAB TRIM", "__ SET", "BeforeStartChecklistToTheLine_StabTrim", function() return "SET" end, evaluateStabTrim))
 beforeStartChecklistToTheLine:addItem(manualChecklistItem:new("PERFORMANCE, WEIGHT & BALANCE", "CHECKED", "BeforeStartChecklistToTheLine_PerformanceWeightBalance"))
 beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("EFB", "AIRPLANE MODE, STOWED", "BeforeStartChecklistToTheLine_EFB", function() return true end))
 beforeStartChecklistToTheLine:addItem(automaticChecklistItem:new("PHONES", "OFF", "BeforeStartChecklistToTheLine_Phones", function() return true end))
@@ -730,7 +737,7 @@ beforeStartChecklistToTheLineTransit:addItem(automaticChecklistItem:new("RUDDER 
 beforeStartChecklistToTheLineTransit:addItem(manualChecklistItem:new("TAKEOFF BRIEFING", "DISCUSSED", "BeforeStartChecklistToTheLine_TakeoffBriefing"))
 beforeStartChecklistToTheLineTransit:addItem(manualChecklistItem:new("PA", "COMPLETE", "BeforeStartChecklistToTheLine_PA"))
 beforeStartChecklistToTheLineTransit:addItem(manualChecklistItem:new("FMC/CDU", "SET", "BeforeStartChecklistToTheLine_FmcCdu"))
-beforeStartChecklistToTheLineTransit:addItem(automaticDynamicResponseChecklistItem:new("N1 & IAS BUGS", "AUTO __ / __ SET", "BeforeStartChecklistToTheLine_N1IasBugs", function() return "N1_IAS_AUTO_VSPEEDS_SET" end, function() return utils.readDataRefFloat("laminar/B738/toggle_switch/n1_set_source") == 0 and utils.readDataRefFloat("laminar/B738/toggle_switch/spd_ref") == 0 and utils.readDataRefFloat("laminar/B738/FMS/v1_set") > 0 and utils.readDataRefFloat("laminar/B738/FMS/vr_set") > 0 and utils.readDataRefFloat("laminar/B738/FMS/v2_set") > 0 and utils.readDataRefFloat("laminar/B738/FMS/v2_set") == utils.readDataRefFloat("laminar/B738/autopilot/mcp_speed_dial_kts") end))
+beforeStartChecklistToTheLineTransit:addItem(automaticDynamicResponseChecklistItem:new("N1 & IAS BUGS", "AUTO __ / __ SET", "BeforeStartChecklistToTheLine_N1IasBugs", function() return "N1_IAS_AUTO_VSPEEDS_SET" end, function() return utils.readDataRefFloat("laminar/B738/toggle_switch/n1_set_source") == 0 and utils.readDataRefFloat("laminar/B738/toggle_switch/spd_ref") == 0 and utils.readDataRefFloat("laminar/B738/FMS/v1_set", 0) > 0 and utils.readDataRefFloat("laminar/B738/FMS/vr_set", 0) > 0 and utils.readDataRefFloat("laminar/B738/FMS/v2_set", 0) > 0 and utils.readDataRefFloat("laminar/B738/FMS/v2_set") == utils.readDataRefFloat("laminar/B738/autopilot/mcp_speed_dial_kts") end))
 beforeStartChecklistToTheLineTransit:addItem(automaticDynamicResponseChecklistItem:new("STAB TRIM", "__ SET", "BeforeStartChecklistToTheLine_StabTrim", function() return "SET" end, evaluateStabTrim))
 beforeStartChecklistToTheLineTransit:addItem(manualChecklistItem:new("PERFORMANCE, WEIGHT & BALANCE", "CHECKED", "BeforeStartChecklistToTheLine_PerformanceWeightBalance"))
 beforeStartChecklistToTheLineTransit:addItem(automaticChecklistItem:new("EFB", "AIRPLANE MODE, STOWED", "BeforeStartChecklistToTheLine_EFB", function() return true end))
@@ -786,7 +793,7 @@ afterTakeoffChecklist:addItem(soundChecklistItem:new("AfterTakeoffChecklist_Star
 afterTakeoffChecklist:addItem(manualChecklistItem:new("AIR COND & PRESS", "SET", "AfterTakeoffChecklist_AirCondPress"))
 afterTakeoffChecklist:addItem(automaticDynamicResponseChecklistItem:new("ENGINE START SWITCHES", "__", "AfterTakeoffChecklist_EngineStartSwitches", getResponseStartSwitches, function() return (utils.readDataRefFloat("laminar/B738/engine/starter1_pos") == 1 and utils.readDataRefFloat("laminar/B738/engine/starter2_pos") == 1) or (utils.readDataRefFloat("laminar/B738/engine/starter1_pos") == 2 and utils.readDataRefFloat("laminar/B738/engine/starter2_pos") == 2 and utils.readDataRefFloat("laminar/B738/ice/eng1_heat_pos") == 1 and utils.readDataRefFloat("laminar/B738/ice/eng2_heat_pos") == 1) end))
 afterTakeoffChecklist:addItem(automaticChecklistItem:new("LANDING GEAR", "UP & OFF", "AfterTakeoffChecklist_LandingGear", function() return utils.readDataRefFloat("laminar/B738/controls/gear_handle_down") == 0.5 end))
-afterTakeoffChecklist:addItem(automaticDynamicResponseChecklistItem:new("AUTOBRAKE", "OFF", "AfterTakeoffChecklist_Autobrake", getResponseAutobrake, function() if isMissedApproach then return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos") >= 1 else return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos") == 1 end end))
+afterTakeoffChecklist:addItem(automaticDynamicResponseChecklistItem:new("AUTOBRAKE", "OFF", "AfterTakeoffChecklist_Autobrake", getResponseAutobrake, function() if isMissedApproach then return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos", 0) >= 1 else return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos") == 1 end end))
 afterTakeoffChecklist:addItem(automaticChecklistItem:new("FLAPS", "UP, NO LIGHTS", "AfterTakeoffChecklist_Flaps", function() return utils.checkArrayValuesAllFloat("laminar/B738/flap_indicator", 0, 2, function(v) return v == 0 end) and utils.readDataRefFloat("laminar/B738/annunciator/slats_transit") == 0 and utils.readDataRefFloat("laminar/B738/annunciator/slats_extend") == 0 end))
 afterTakeoffChecklist:addItem(manualChecklistItem:new("ALTIMETERS", "SET", "AfterTakeoffChecklist_Altimeters"))
 afterTakeoffChecklist:addItem(soundChecklistItem:new("AfterTakeoffChecklist_Completed"))
@@ -811,7 +818,7 @@ landingChecklist:addItem(automaticChecklistItem:new("START SWITCHES", "CONT", "L
 landingChecklist:addItem(automaticChecklistItem:new("RECALL", "CHECKED", "BeforeTaxiChecklist_Recall", function() return recallCheckedLanding end))
 landingChecklist:addItem(automaticDynamicResponseChecklistItem:new("SPEEDBRAKE", "ARMED", "LandingChecklist_Speedbrake", function() return "ARMED_GREEN_LIGHT" end, function() return utils.readDataRefFloat("laminar/B738/annunciator/speedbrake_armed") == 1 end))
 landingChecklist:addItem(automaticChecklistItem:new("LANDING GEAR", "DOWN, 3 GREENS", "LandingChecklist_LandingGear", function() return utils.readDataRefFloat("laminar/B738/controls/gear_handle_down") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/nose_gear_safe") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/left_gear_safe") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/right_gear_safe") == 1 end))
-landingChecklist:addItem(automaticDynamicResponseChecklistItem:new("AUTOBRAKE", "__", "LandingChecklist_Autobrake", getResponseAutobrake, function() return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos") >= 2 end))
+landingChecklist:addItem(automaticDynamicResponseChecklistItem:new("AUTOBRAKE", "__", "LandingChecklist_Autobrake", getResponseAutobrake, function() return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos", 0) >= 2 end))
 landingChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__ / __, GREEN LIGHT", "LandingChecklist_Flaps", getResponseFlapsSet, function() return utils.readDataRefFloat("laminar/B738/FMS/approach_flaps_set") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/slats_extend") == 1 end))
 landingChecklist:addItem(automaticChecklistItem:new("LANDING LIGHTS", "ON", "LandingChecklist_LandingLights", function() return utils.readDataRefFloat("laminar/B738/switch/land_lights_right_pos") == 1 and utils.readDataRefFloat("laminar/B738/switch/land_lights_left_pos") == 1 end))
 landingChecklist:addItem(soundChecklistItem:new("LandingChecklist_Completed"))
@@ -839,7 +846,7 @@ shutdownChecklist:addItem(automaticChecklistItem:new("START LEVERS", "CUTOFF", "
 shutdownChecklist:addItem(automaticChecklistItem:new("WEATHER RADAR", "OFF", "ShutdownChecklist_WeatherRadar", function() return utils.readDataRefInteger("sim/cockpit2/EFIS/EFIS_weather_on") == 0 end))
 shutdownChecklist:addItem(automaticChecklistItem:new("TRANSPONDER", "STBY", "ShutdownChecklist_Transponder", function() return utils.readDataRefFloat("laminar/B738/knob/transponder_pos") == 1 end))
 shutdownChecklist:addItem(automaticDynamicResponseChecklistItem:new("CVR CB", "IN / OUT", "ShutdownChecklist_CvrCB", function() return "IN" end, function() return true end))
-shutdownChecklist:addItem(automaticChecklistItem:new("COCKPIT DOOR", "UNLOCKED", "ShutdownChecklist_CockpitDoor", function() return utils.readDataRefFloat("laminar/B738/door/flt_dk_door_ratio") > 0 end))
+shutdownChecklist:addItem(automaticChecklistItem:new("COCKPIT DOOR", "UNLOCKED", "ShutdownChecklist_CockpitDoor", function() return utils.readDataRefFloat("laminar/B738/door/flt_dk_door_ratio", 0) > 0 end))
 shutdownChecklist:addItem(soundChecklistItem:new("ShutdownChecklist_Completed"))
 
 -- ################# SHUTDOWN (TRANSIT)
@@ -862,7 +869,7 @@ shutdownChecklistTransit:addItem(automaticChecklistItem:new("START LEVERS", "CUT
 shutdownChecklistTransit:addItem(automaticChecklistItem:new("WEATHER RADAR", "OFF", "ShutdownChecklist_WeatherRadar", function() return utils.readDataRefInteger("sim/cockpit2/EFIS/EFIS_weather_on") == 0 end))
 shutdownChecklistTransit:addItem(automaticChecklistItem:new("TRANSPONDER", "STBY", "ShutdownChecklist_Transponder", function() return utils.readDataRefFloat("laminar/B738/knob/transponder_pos") == 1 end))
 shutdownChecklistTransit:addItem(automaticDynamicResponseChecklistItem:new("CVR CB", "IN / OUT", "ShutdownChecklist_CvrCB", function() return "IN" end, function() return true end))
-shutdownChecklistTransit:addItem(automaticChecklistItem:new("COCKPIT DOOR", "UNLOCKED", "ShutdownChecklist_CockpitDoor", function() return utils.readDataRefFloat("laminar/B738/door/flt_dk_door_ratio") > 0 end))
+shutdownChecklistTransit:addItem(automaticChecklistItem:new("COCKPIT DOOR", "UNLOCKED", "ShutdownChecklist_CockpitDoor", function() return utils.readDataRefFloat("laminar/B738/door/flt_dk_door_ratio", 0) > 0 end))
 shutdownChecklistTransit:addItem(soundChecklistItem:new("ShutdownChecklist_Completed"))
 
 -- ################# SECURE
