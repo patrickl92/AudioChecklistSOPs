@@ -114,15 +114,15 @@ end
 -- This function is called every second and is used to update values which are not required immediately
 local function updateDataRefVariablesOften()
 	enginesRunning = utils.checkArrayValuesAllInteger("sim/flightmodel/engine/ENGN_running", 0, 2, function(v) return v == 1 end)
-	
+
 	local radioAltimeterValue = utils.readDataRefFloat("sim/cockpit2/gauges/indicators/radio_altimeter_height_ft_pilot", 0)
 	radioAltimeterActive = radioAltimeterValue > 1 and radioAltimeterValue <= 2500
-	
+
 	if radioAltimeterValue <= 1 then
 		-- Aircraft is on the ground
 		isMissedApproach = false
 	end
-	
+
 	local togaActivated = false
 	if utils.readDataRefFloat("laminar/B738/autopilot/pfd_alt_mode") == 11 then
 		-- Aircraft is in TO/GA mode
@@ -133,20 +133,20 @@ local function updateDataRefVariablesOften()
 	else
 		togaActive = false
 	end
-		
+
 	if togaActivated then
 		-- Stop the current checklist if TO/GA was activated
 		sopExecutor.stopChecklist()
-		
+
 		-- Reset the airborne checklists if TO/GA was activated
 		afterTakeoffChecklist:reset()
 		descentChecklist:reset()
 		approachChecklist:reset()
 		landingChecklist:reset()
-		
+
 		-- Reset the values for the next approach in case of a go around
 		recallCheckedLanding = false
-		
+
 		if radioAltimeterValue > 1 then
 			-- Indicate a missed approach if the airplane was not on the ground when TO/GA was activated
 			isMissedApproach = true
@@ -163,13 +163,13 @@ local function updateDataRefVariablesEveryFrame()
 		-- The light test has been performed
 		lightTestDone = true
 	end
-	
+
 	if not oxygenChecked and (utils.readDataRefFloat("laminar/B738/push_button/oxy_test_cpt_pos") == 1 or utils.readDataRefFloat("laminar/B738/push_button/oxy_test_fo_pos") == 1) then
 		-- The oxygon check has been performed
 		oxygenChecked = true
 	end
-	
-	if not fireWarningTestDone 
+
+	if not fireWarningTestDone
 		and utils.readDataRefFloat("laminar/B738/toggle_switch/fire_test") == 1
 		and utils.readDataRefFloat("laminar/B738/annunciator/fire_bell_annun") == 1
 		and utils.readDataRefFloat("laminar/B738/annunciator/fire_bell_annun2") == 1
@@ -189,31 +189,31 @@ local function updateDataRefVariablesEveryFrame()
 		if not flightControlYokeFullForwardChecked and utils.readDataRefFloat("laminar/yoke/pitch", 0) < -0.9 then
 			flightControlYokeFullForwardChecked = true
 		end
-		
+
 		if not flightControlYokeFullBackwardChecked and utils.readDataRefFloat("laminar/yoke/pitch", 0) > 0.9 then
 			flightControlYokeFullBackwardChecked = true
 		end
-		
+
 		if not flightControlYokeFullLeftChecked and utils.readDataRefFloat("laminar/yoke/roll", 0) < -0.9 then
 			flightControlYokeFullLeftChecked = true
 		end
-		
+
 		if not flightControlYokeFullRightChecked and utils.readDataRefFloat("laminar/yoke/roll", 0) > 0.9 then
 			flightControlYokeFullRightChecked = true
 		end
-		
+
 		if not flightControlRudderFullRightChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio", 0) > 0.9 then
 			flightControlRudderFullRightChecked = true
 		end
-		
+
 		if not flightControlRudderFullLeftChecked and utils.readDataRefFloat("sim/cockpit2/controls/yoke_heading_ratio", 0) < -0.9 then
 			flightControlRudderFullLeftChecked = true
 		end
-		
+
 		if not recallCheckedBeforeTaxi and (utils.readDataRefFloat("laminar/B738/buttons/capt_6_pack_pos") == 1 or utils.readDataRefFloat("laminar/B738/buttons/fo_6_pack_pos") == 1) then
 			recallCheckedBeforeTaxi = true
 		end
-		
+
 		if not takeoffConfigChecked and utils.checkArrayValuesAnyFloat("sim/cockpit2/engine/actuators/throttle_ratio", 0, 2, function(v) return v >= 0.5 end) then
 			takeoffConfigChecked = true
 		end
@@ -230,7 +230,7 @@ local function updateDataRefVariablesEveryFrame()
 		recallCheckedLanding = false
 		isMissedApproach = false
 	end
-	
+
 	-- Only check certain values if the radio altimeter displays a value, to prevent any decrease in performance
 	if radioAltimeterActive then
 		if not recallCheckedLanding and (utils.readDataRefFloat("laminar/B738/buttons/capt_6_pack_pos") == 1 or utils.readDataRefFloat("laminar/B738/buttons/fo_6_pack_pos") == 1) then
@@ -248,7 +248,7 @@ local function getResponseFuelPumps()
 	if utils.readDataRefFloat("laminar/B738/fuel/fuel_tank_pos_ctr1") == 1 then
 		return "FUEL_PUMPS_6_ON"
 	end
-	
+
 	return "FUEL_PUMPS_4_ON"
 end
 
@@ -258,7 +258,7 @@ local function getResponseAntiIce()
 	if utils.readDataRefFloat("laminar/B738/ice/eng1_heat_pos") == 1 then
 		return "ON"
 	end
-	
+
 	return "OFF"
 end
 
@@ -268,7 +268,7 @@ local function getResponseStartSwitches()
 	if utils.readDataRefFloat("laminar/B738/engine/starter1_pos") == 2 then
 		return "CONT"
 	end
-	
+
 	return "OFF"
 end
 
@@ -276,27 +276,27 @@ end
 -- @treturn string The key of the response sound file to play
 local function getResponseFlapsRequiredSet()
 	local requiredFlaps = utils.readDataRefFloat("laminar/B738/FMS/takeoff_flaps")
-	
+
 	if requiredFlaps == 1 then
 		return "FLAPS_1_REQUIRED_AND_SELECTED_GREEN_LIGHT"
 	end
-	
+
 	if requiredFlaps == 5 then
 		return "FLAPS_5_REQUIRED_AND_SELECTED_GREEN_LIGHT"
 	end
-	
+
 	if requiredFlaps == 10 then
 		return "FLAPS_10_REQUIRED_AND_SELECTED_GREEN_LIGHT"
 	end
-	
+
 	if requiredFlaps == 15 then
 		return "FLAPS_15_REQUIRED_AND_SELECTED_GREEN_LIGHT"
 	end
-	
+
 	if requiredFlaps == 25 then
 		return "FLAPS_25_REQUIRED_AND_SELECTED_GREEN_LIGHT"
 	end
-	
+
 	return "CHECKED"
 end
 
@@ -304,39 +304,39 @@ end
 -- @treturn string The key of the response sound file to play
 local function getResponseFlapsSet()
 	local flapLeverPos = utils.readDataRefFloat("laminar/B738/flt_ctrls/flap_lever")
-		
+
 	if flapLeverPos == 0.125 then
 		return "FLAPS_1_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 0.25 then
 		return "FLAPS_2_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 0.375 then
 		return "FLAPS_5_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 0.5 then
 		return "FLAPS_10_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 0.625 then
 		return "FLAPS_15_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 0.75 then
 		return "FLAPS_25_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 0.875 then
 		return "FLAPS_30_SET_GREEN_LIGHT"
 	end
-	
+
 	if flapLeverPos == 1 then
 		return "FLAPS_40_SET_GREEN_LIGHT"
 	end
-		
+
 	return "CHECKED"
 end
 
@@ -344,31 +344,31 @@ end
 -- @treturn string The key of the response sound file to play
 local function getResponseAutobrake()
 	local autobrakeSwitchPosition = utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos")
-	
+
 	if autobrakeSwitchPosition == 0 then
 		return "RTO"
 	end
-	
+
 	if autobrakeSwitchPosition == 1 then
 		return "OFF"
 	end
-	
+
 	if autobrakeSwitchPosition == 2 then
 		return "AUTOBRAKE_1"
 	end
-	
+
 	if autobrakeSwitchPosition == 3 then
 		return "AUTOBRAKE_2"
 	end
-	
+
 	if autobrakeSwitchPosition == 4 then
 		return "AUTOBRAKE_3"
 	end
-	
+
 	if autobrakeSwitchPosition == 5 then
 		return "AUTOBRAKE_MAX"
 	end
-	
+
 	return "CHECKED"
 end
 
@@ -378,11 +378,11 @@ local function getResponseElectrical()
 	if utils.readDataRefInteger("sim/cockpit/electrical/generator_apu_on") == 1 then
 		return "APU_ON_THE_BUS"
 	end
-	
+
 	if utils.readDataRefInteger("sim/cockpit/electrical/gpu_on") == 1 then
 		return "GPU_ON_THE_BUS"
 	end
-	
+
 	return "CHECKED"
 end
 
@@ -391,11 +391,11 @@ end
 local function evaluateStabTrim()
 	local trimCalculated = utils.readDataRefFloat("laminar/B738/FMS/trim_calc")
 	local trimWheel = utils.readDataRefFloat("laminar/B738/flt_ctrls/trim_wheel")
-	
+
 	if not trimCalculated or not trimWheel then
 		return false
 	end
-	
+
 	return math.abs(trimCalculated - (8 + 8 * trimWheel)) < 1
 end
 
@@ -733,7 +733,7 @@ beforeStartChecklistToTheLineTransit:addItem(automaticChecklistItem:new("AUTOBRA
 beforeStartChecklistToTheLineTransit:addItem(automaticChecklistItem:new("PARKING BRAKE", "SET", "BeforeStartChecklistToTheLine_Parkingbrake", function() return utils.readDataRefFloat("laminar/B738/parking_brake_pos") == 1 end))
 beforeStartChecklistToTheLineTransit:addItem(automaticChecklistItem:new("STAB TRIM CUTOUT SWITCHES", "NORMAL", "BeforeStartChecklistToTheLine_StabTrimCutoutSwitches", function() return utils.readDataRefFloat("laminar/B738/toggle_switch/el_trim_pos") == 0 and utils.readDataRefFloat("laminar/B738/toggle_switch/ap_trim_pos") == 0 end))
 beforeStartChecklistToTheLineTransit:addItem(manualChecklistItem:new("RADIOS, RADAR * TXPDR", "SET & STBY", "BeforeStartChecklistToTheLine_RadiosRadarTransponder"))
-beforeStartChecklistToTheLineTransit:addItem(automaticChecklistItem:new("RUDDER & AILERON TRIMS", "FREE & ZERO", "BeforeStartChecklistToTheLine_RudderAileronTrims", function() return utils.readDataRefFloat("sim/cockpit2/controls/rudder_trim") == 0 and utils.readDataRefFloat("sim/cockpit2/controls/aileron_trim") == 0 end))
+beforeStartChecklistToTheLineTransit:addItem(automaticChecklistItem:new("RUDDER & AILERON TRIMS", "FREE & ZERO", "BeforeStartChecklistToTheLine_RudderAileronTrims", function() return math.abs(utils.readDataRefFloat("sim/cockpit2/controls/rudder_trim", 0)) < 0.01 and math.abs(utils.readDataRefFloat("sim/cockpit2/controls/aileron_trim", 0)) < 0.1 end))
 beforeStartChecklistToTheLineTransit:addItem(manualChecklistItem:new("TAKEOFF BRIEFING", "DISCUSSED", "BeforeStartChecklistToTheLine_TakeoffBriefing"))
 beforeStartChecklistToTheLineTransit:addItem(manualChecklistItem:new("PA", "COMPLETE", "BeforeStartChecklistToTheLine_PA"))
 beforeStartChecklistToTheLineTransit:addItem(manualChecklistItem:new("FMC/CDU", "SET", "BeforeStartChecklistToTheLine_FmcCdu"))
