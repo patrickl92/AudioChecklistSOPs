@@ -594,7 +594,7 @@ beforeTaxiChecklist:addItem(soundChecklistItem:new("BeforeTaxi_Complete"))
 -- ################# BEFORE TAKEOFF
 beforeTakeoffChecklist:addItem(soundChecklistItem:new("BeforeTakeoff_Start"))
 beforeTakeoffChecklist:addItem(automaticChecklistItem:new("CABIN REPORT", "RECEIVED", "BeforeTakeoff_CabinReport", function() return true end))
-beforeTakeoffChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__, GREEN LIGHT", "BeforeTakeoff_Flaps", getResponseFlapsSetGreenLight, function() return utils.readDataRefFloat("laminar/B738/FMS/takeoff_flaps_set") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/slats_extend") == 1 end))
+beforeTakeoffChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__, GREEN LIGHT", "BeforeTakeoff_Flaps", getResponseFlapsSetGreenLight, function() return utils.readDataRefFloat("laminar/B738/FMS/takeoff_flaps_set") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/slats_extend") > 0.0 end))
 beforeTakeoffChecklist:addItem(automaticDynamicResponseChecklistItem:new("STABILIZER TRIM", "__, UNITS", "BeforeTakeoff_StabilizerTrim", function() return "CHECKED_SET_FOR_TAKEOFF" end, evaluateStabTrim))
 beforeTakeoffChecklist:addItem(soundChecklistItem:new("BeforeTakeoff_Complete"))
 
@@ -627,7 +627,7 @@ landingChecklist:addItem(automaticChecklistItem:new("CABIN REPORT", "RECEIVED", 
 landingChecklist:addItem(automaticChecklistItem:new("ENGINE START SWITCHES", "CONT", "Landing_EngineStartSwitches", function() return utils.readDataRefFloat("laminar/B738/engine/starter1_pos") == 2 and utils.readDataRefFloat("laminar/B738/engine/starter2_pos") == 2 end))
 landingChecklist:addItem(automaticChecklistItem:new("SPEEDBRAKE", "ARMED", "Landing_SpeedBrake", function() return utils.readDataRefFloat("laminar/B738/annunciator/speedbrake_armed") == 1 and utils.readDataRefFloat("laminar/B738/flt_ctrls/speedbrake_lever") < 0.1 end))
 landingChecklist:addItem(automaticChecklistItem:new("LANDING GEAR", "DOWN", "Landing_LandingGear", function() return utils.readDataRefFloat("laminar/B738/controls/gear_handle_down") == 1 end))
-landingChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__, GREEN LIGHT", "Landing_Flaps", getResponseFlapsSetGreenLight, function() return utils.readDataRefFloat("laminar/B738/FMS/approach_flaps_set") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/slats_extend") == 1 end))
+landingChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__, GREEN LIGHT", "Landing_Flaps", getResponseFlapsSetGreenLight, function() return utils.readDataRefFloat("laminar/B738/FMS/approach_flaps_set") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/slats_extend") > 0.0 end))
 landingChecklist:addItem(soundChecklistItem:new("Landing_Complete"))
 
 -- ################# SHUTDOWN
