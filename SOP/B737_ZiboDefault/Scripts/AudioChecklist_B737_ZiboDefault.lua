@@ -170,15 +170,17 @@ local function updateDataRefVariablesEveryFrame()
 	end
 
 	if not fireWarningTestDone
+		--X-Plane 12 appears to have changed the value that annunciators return when lit so that they are no longer 0 or 1
+		--but a range between 0 and 1
 		and utils.readDataRefFloat("laminar/B738/toggle_switch/fire_test") == 1
-		and utils.readDataRefFloat("laminar/B738/annunciator/fire_bell_annun") == 1
-		and utils.readDataRefFloat("laminar/B738/annunciator/fire_bell_annun2") == 1
-		and utils.readDataRefFloat("laminar/B738/annunciator/wheel_well_fire") == 1
-		and utils.readDataRefFloat("laminar/B738/annunciator/engine1_fire") == 1
-		and utils.readDataRefFloat("laminar/B738/annunciator/engine1_ovht") == 1
-		and utils.readDataRefFloat("laminar/B738/annunciator/engine2_fire") == 1
-		and utils.readDataRefFloat("laminar/B738/annunciator/engine2_ovht") == 1
-		and utils.readDataRefFloat("laminar/B738/annunciator/apu_fire") == 1
+		and utils.readDataRefFloat("laminar/B738/annunciator/fire_bell_annun") > 0.0
+		and utils.readDataRefFloat("laminar/B738/annunciator/fire_bell_annun2") > 0.0
+		and utils.readDataRefFloat("laminar/B738/annunciator/wheel_well_fire") > 0.0
+		and utils.readDataRefFloat("laminar/B738/annunciator/engine1_fire") > 0.0
+		and utils.readDataRefFloat("laminar/B738/annunciator/engine1_ovht") > 0.0
+		and utils.readDataRefFloat("laminar/B738/annunciator/engine2_fire") > 0.0
+		and utils.readDataRefFloat("laminar/B738/annunciator/engine2_ovht") > 0.0
+		and utils.readDataRefFloat("laminar/B738/annunciator/apu_fire") > 0.0
 		then
 		-- The fire warning test has been performed
 		fireWarningTestDone = true
@@ -764,7 +766,7 @@ beforeTaxiChecklist:addItem(automaticChecklistItem:new("PROBE HEAT", "ON", "Befo
 beforeTaxiChecklist:addItem(automaticDynamicResponseChecklistItem:new("ANTI-ICE", "__", "BeforeTaxiChecklist_AntiIce", getResponseAntiIce, function() return utils.readDataRefFloat("laminar/B738/ice/eng1_heat_pos") == utils.readDataRefFloat("laminar/B738/ice/eng2_heat_pos") end))
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("AIR COND", "PACKS AUTO, BLEEDS ON", "BeforeTaxiChecklist_AirConditioning", function() return utils.readDataRefFloat("laminar/B738/air/l_pack_pos") == 1 and utils.readDataRefFloat("laminar/B738/air/r_pack_pos") == 1 and utils.readDataRefFloat("laminar/B738/toggle_switch/bleed_air_1_pos") == 1 and utils.readDataRefFloat("laminar/B738/toggle_switch/bleed_air_2_pos") == 1 and utils.readDataRefFloat("laminar/B738/toggle_switch/bleed_air_apu_pos") == 0 end))
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("ISOLATION VALVE", "AUTO", "BeforeTaxiChecklist_IsolationValve", function() return utils.readDataRefFloat("laminar/B738/air/isolation_valve_pos") == 1 end))
-beforeTaxiChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__ REQ __ SEL, GREEN LIGHT", "BeforeTaxiChecklist_Flaps", getResponseFlapsRequiredSet, function() return utils.readDataRefFloat("laminar/B738/FMS/takeoff_flaps_set") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/slats_extend") == 1 end))
+beforeTaxiChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__ REQ __ SEL, GREEN LIGHT", "BeforeTaxiChecklist_Flaps", getResponseFlapsRequiredSet, function() return utils.readDataRefFloat("laminar/B738/FMS/takeoff_flaps_set") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/slats_extend") > 0.0 end))
 beforeTaxiChecklist:addItem(automaticDynamicResponseChecklistItem:new("STAB TRIM", "__ UNITS REQ, __ SET", "BeforeTaxiChecklist_StabTrim", function() return "SET" end, evaluateStabTrim))
 beforeTaxiChecklist:addItem(automaticDynamicResponseChecklistItem:new("START LEVER", "__ IDLE DETENT", "BeforeTaxiChecklist_StartLever", function() return "IDLE_DETENT" end, function() return utils.readDataRefFloat("laminar/B738/engine/mixture_ratio1") == 1 and utils.readDataRefFloat("laminar/B738/engine/mixture_ratio2") == 1 end))
 beforeTaxiChecklist:addItem(automaticChecklistItem:new("FLIGHT CONTROL", "CHECKED", "BeforeTaxiChecklist_FlightControls", function() return flightControlYokeFullForwardChecked and flightControlYokeFullBackwardChecked and flightControlYokeFullLeftChecked and flightControlYokeFullRightChecked and flightControlRudderFullRightChecked and flightControlRudderFullLeftChecked end))
@@ -816,10 +818,10 @@ approachChecklist:addItem(soundChecklistItem:new("ApproachChecklist_Completed"))
 landingChecklist:addItem(soundChecklistItem:new("LandingChecklist_Start"))
 landingChecklist:addItem(automaticChecklistItem:new("START SWITCHES", "CONT", "LandingChecklist_StartSwitches", function() return utils.readDataRefFloat("laminar/B738/engine/starter1_pos") == 2 and utils.readDataRefFloat("laminar/B738/engine/starter2_pos") == 2 end))
 landingChecklist:addItem(automaticChecklistItem:new("RECALL", "CHECKED", "BeforeTaxiChecklist_Recall", function() return recallCheckedLanding end))
-landingChecklist:addItem(automaticDynamicResponseChecklistItem:new("SPEEDBRAKE", "ARMED", "LandingChecklist_Speedbrake", function() return "ARMED_GREEN_LIGHT" end, function() return utils.readDataRefFloat("laminar/B738/annunciator/speedbrake_armed") == 1 and utils.readDataRefFloat("laminar/B738/flt_ctrls/speedbrake_lever") < 0.1 end))
-landingChecklist:addItem(automaticChecklistItem:new("LANDING GEAR", "DOWN, 3 GREENS", "LandingChecklist_LandingGear", function() return utils.readDataRefFloat("laminar/B738/controls/gear_handle_down") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/nose_gear_safe") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/left_gear_safe") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/right_gear_safe") == 1 end))
+landingChecklist:addItem(automaticDynamicResponseChecklistItem:new("SPEEDBRAKE", "ARMED", "LandingChecklist_Speedbrake", function() return "ARMED_GREEN_LIGHT" end, function() return utils.readDataRefFloat("laminar/B738/annunciator/speedbrake_armed") > 0.0 and utils.readDataRefFloat("laminar/B738/flt_ctrls/speedbrake_lever") < 0.1 end))
+landingChecklist:addItem(automaticChecklistItem:new("LANDING GEAR", "DOWN, 3 GREENS", "LandingChecklist_LandingGear", function() return utils.readDataRefFloat("laminar/B738/controls/gear_handle_down") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/nose_gear_safe") > 0.0 and utils.readDataRefFloat("laminar/B738/annunciator/left_gear_safe") > 0.0 and utils.readDataRefFloat("laminar/B738/annunciator/right_gear_safe") > 0.0 end))
 landingChecklist:addItem(automaticDynamicResponseChecklistItem:new("AUTOBRAKE", "__", "LandingChecklist_Autobrake", getResponseAutobrake, function() return utils.readDataRefFloat("laminar/B738/autobrake/autobrake_pos", 0) >= 2 end))
-landingChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__ / __, GREEN LIGHT", "LandingChecklist_Flaps", getResponseFlapsSet, function() return utils.readDataRefFloat("laminar/B738/FMS/approach_flaps_set") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/slats_extend") == 1 end))
+landingChecklist:addItem(automaticDynamicResponseChecklistItem:new("FLAPS", "__ / __, GREEN LIGHT", "LandingChecklist_Flaps", getResponseFlapsSet, function() return utils.readDataRefFloat("laminar/B738/FMS/approach_flaps_set") == 1 and utils.readDataRefFloat("laminar/B738/annunciator/slats_extend") > 0.0 end))
 landingChecklist:addItem(automaticChecklistItem:new("LANDING LIGHTS", "ON", "LandingChecklist_LandingLights", function() return utils.readDataRefFloat("laminar/B738/switch/land_lights_right_pos") == 1 and utils.readDataRefFloat("laminar/B738/switch/land_lights_left_pos") == 1 end))
 landingChecklist:addItem(soundChecklistItem:new("LandingChecklist_Completed"))
 
